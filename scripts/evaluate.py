@@ -1,4 +1,5 @@
-"""Evaluation script: compares student predictions to correct answers."""
+"""Evaluation script: compares student predictions to correct answers"""
+
 import argparse
 import sys
 from pathlib import Path
