@@ -1,6 +1,6 @@
 # Heart Risk ML Project
 
-This repository contains an end-to-end solution for predicting binary heart attack risk from patient data (anthropometrics, habits, blood pressure, chronic conditions, blood biochemistry). It includes exploratory analysis, preprocessing, model training (e.g. CatBoost / scikit-learn), a FastAPI application that accepts a path to a test CSV and returns predictions in JSON, and evaluation tooling.
+This repository contains an end-to-end solution for predicting binary heart attack risk from patient data (anthropometrics, habits, blood pressure, chronic conditions, blood biochemistry). It includes exploratory analysis, preprocessing, model training (e.g. CatBoost / scikit-learn), a FastAPI application that accepts a path to a test CSV and returns predictions in JSON, and evaluation tooling
 
 ---
 
@@ -35,16 +35,15 @@ heart-risk-ml-project/
    ```
 
 2. **Train and export artifacts**  
-   Use the notebook in `notebooks/` for EDA, preprocessing, and training; the application in `src/` will load the saved model and preprocessing objects.
+   Use the notebook in `notebooks/` for EDA, preprocessing, and training; the application in `src/` will load the saved model and preprocessing objects
 
 3. **Start the API**
    ```bash
    uvicorn src.app:app --reload
    ```
-   (Exact module path will be set when the app is implemented; see `docs/` for the final run instructions.)
 
 4. **Get predictions**  
-   Send a path to the test CSV (e.g. via POST); the service returns JSON with predictions. Optionally use the provided web UI or a small script that calls the API.
+   Send a path to the test CSV (e.g. via POST); the service returns JSON with predictions. Optionally use the provided web UI or a small script that calls the API
 
 5. **Evaluate predictions**  
    Save your predictions as a CSV with columns `id` and `prediction`, then run:
@@ -56,8 +55,8 @@ heart-risk-ml-project/
 
 ## Data and target
 
-- **Training**: `heart_train.csv` includes a binary target (e.g. `Heart Attack Risk (Binary)`).
-- **Test**: `heart_test.csv` has the same features but no target; predictions must be in a CSV with columns `id` and `prediction`.
+- **Training**: `heart_train.csv` includes a binary target (e.g. `Heart Attack Risk (Binary)`)
+- **Test**: `heart_test.csv` has the same features but no target; predictions must be in a CSV with columns `id` and `prediction`
 
 ---
 
