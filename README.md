@@ -1,17 +1,6 @@
 # Heart Risk ML Project
 
-**ML-based heart attack risk prediction: FastAPI service, preprocessing pipeline, and model training.**
-
 This repository contains an end-to-end solution for predicting binary heart attack risk from patient data (anthropometrics, habits, blood pressure, chronic conditions, blood biochemistry). It includes exploratory analysis, preprocessing, model training (e.g. CatBoost / scikit-learn), a FastAPI application that accepts a path to a test CSV and returns predictions in JSON, and evaluation tooling.
-
----
-
-## Repository summary (for GitHub)
-
-- **What it is**: A structured ML project for **heart attack risk classification** (binary: high vs low risk).
-- **Contents**: Jupyter notebooks (EDA + training), Python library and FastAPI app (OOP), prediction CSV (`id`, `prediction`), evaluation script, and documentation.
-- **Stack**: Python 3.10+, Pandas, NumPy, Scikit-learn, CatBoost, FastAPI, HTML (optional UI).
-- **Output**: FastAPI service that takes a path to a test CSV, runs the trained pipeline, and returns JSON predictions; optional web UI or CLI script for testing.
 
 ---
 
@@ -74,14 +63,8 @@ heart-risk-ml-project/
 
 ## Deliverables (as per specification)
 
-- [ ] Jupyter notebook: EDA, preprocessing, model training, and conclusions
-- [ ] Application code in `src/` (OOP, clean structure)
-- [ ] Predictions on the test set in CSV format (`id`, `prediction`)
-- [ ] Run instructions and/or notebook demo and/or live demo
-- [ ] Documentation: user guide and description of main classes and methods
-
----
-
-## License
-
-See repository settings. For course/academic use only unless otherwise stated.
+- [x] Jupyter notebook: EDA, preprocessing, model training (`notebooks/eda_and_training.ipynb`)
+- [x] Application code in `src/` (OOP: `HeartRiskPreprocessor`, `HeartRiskModel`, `HeartRiskPipeline`, FastAPI app)
+- [x] Predictions on the test set in CSV format (`predictions.csv` with `id`, `prediction`)
+- [x] Run instructions: [docs/RUN.md](docs/RUN.md); optional notebook demo or live demo
+- [x] Documentation: [docs/RUN.md](docs/RUN.md) (how to run), [docs/API.md](docs/API.md) (classes and methods)

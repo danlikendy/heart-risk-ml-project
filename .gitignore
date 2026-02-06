@@ -14,6 +14,7 @@ env/
 # Jupyter
 .ipynb_checkpoints/
 *.ipynb_checkpoints
+notebooks/catboost_info/
 
 # IDE
 .idea/
@@ -35,15 +36,12 @@ htmlcov/
 .tox/
 .nox/
 
-# Data (optional: track or ignore large files)
+# Data
 # data/*.csv
 # *.csv
 
-# Model artifacts (uncomment if not versioning)
-# models/
-# *.pkl
-# *.joblib
-# *.model
+# Model artifacts
+artifacts/
 
 # OS
 .DS_Store
@@ -53,5 +51,5 @@ Thumbs.db
 *.log
 logs/
 
-# Correct answers (do not commit)
+# Correct answers
 correct_answers.csv
