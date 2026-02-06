@@ -10,6 +10,7 @@ catboost>=1.2
 # API
 fastapi>=0.104
 uvicorn[standard]>=0.24
+python-multipart>=0.0.6
 
 # Viz (notebooks)
 matplotlib>=3.7

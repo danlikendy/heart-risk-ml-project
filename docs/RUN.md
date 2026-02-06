@@ -53,9 +53,32 @@ From the project root (with the virtualenv activated):
 uvicorn src.app:app --reload --host 0.0.0.0 --port 8000
 ```
 
-- API: `http://localhost:8000`
-- Swagger UI: `http://localhost:8000/docs`
-- Simple HTML page: `http://localhost:8000/`
+### Все ссылки (когда сервер запущен)
+
+| Назначение | Ссылка |
+|------------|--------|
+| Главная (форма загрузки) | [http://127.0.0.1:8000/](http://127.0.0.1:8000/) |
+| Swagger UI (интерактивная документация) | [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) |
+| ReDoc | [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc) |
+| Проверка работы API | [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health) |
+| Предсказание по пути к CSV | `POST` [http://127.0.0.1:8000/predict](http://127.0.0.1:8000/predict) |
+| Предсказание по загрузке файла | `POST` [http://127.0.0.1:8000/predict/upload](http://127.0.0.1:8000/predict/upload) |
+
+Тот же доступ по `http://localhost:8000` вместо `127.0.0.1`, если не меняли хост.
+
+### Как самому проверить FastAPI
+
+1. **Health** — в браузере открой [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health): должен вернуться `{"status":"ok"}`.
+2. **Главная страница** — открой [http://127.0.0.1:8000/](http://127.0.0.1:8000/): форма загрузки CSV и кнопка отправки.
+3. **Swagger** — открой [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs): можно вызвать `/health`, `/predict` и `/predict/upload` из интерфейса.
+4. **Предсказание по пути к файлу** (из корня проекта):
+   ```bash
+   curl -X POST http://127.0.0.1:8000/predict -H "Content-Type: application/json" -d '{"csv_path": "heart_test.csv"}'
+   ```
+5. **Предсказание по загрузке файла**:
+   ```bash
+   curl -X POST http://127.0.0.1:8000/predict/upload -F "file=@heart_test.csv"
+   ```
 
 ## 4. Get predictions
 
