@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Heart risk scoring — Tsygantsov</title>
+  <meta name="description" content="Binary heart-attack risk on clinical tabular data. CatBoost, F1-macro, FastAPI. Not a medical device." />
+  <style>
+    :root {
+      --bg: #12110f;
+      --fg: #e8e2d6;
+      --muted: #9a9284;
+      --line: #2a2722;
+      --accent: #c45c3e;
+      --ok: #c4b48a;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--fg); }
+    body {
+      font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, sans-serif;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 20px 80px;
+    }
+    h1 { font-size: 1.55rem; font-weight: 650; letter-spacing: -0.02em; margin: 0 0 8px; }
+    h2 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ok); margin: 36px 0 10px; font-weight: 600; }
+    p { margin: 0 0 12px; }
+    a { color: var(--fg); }
+    .sub { color: var(--muted); margin-bottom: 28px; }
+    .rule { height: 1px; background: var(--line); margin: 28px 0; }
+    .nums { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    @media (min-width: 560px) { .nums { grid-template-columns: repeat(4, 1fr); } }
+    .num {
+      border: 1px solid var(--line);
+      padding: 12px 12px 10px;
+    }
+    .num b { display: block; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+    .num span { color: var(--muted); font-size: 0.78rem; }
+    table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 0.92rem; }
+    th, td { text-align: left; padding: 6px 0; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 500; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.86rem; }
+    pre {
+      background: #0c0b0a;
+      border: 1px solid var(--line);
+      padding: 14px 16px;
+      overflow-x: auto;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+    .warn { color: var(--accent); font-size: 0.9rem; }
+    footer { margin-top: 40px; color: var(--muted); font-size: 0.85rem; }
+    .links a { margin-right: 14px; }
+  </style>
+</head>
+<body>
+  <h1>Heart-attack risk from a patient table</h1>
+  <p class="sub">CatBoost on 26 clinical fields → 0/1. Served as CSV in, JSON out. Artem Tsygantsov, 2026.</p>
+  <p class="links">
+    <a href="https://github.com/danlikendy/heart-risk-ml-project">repo</a>
+    <a href="https://github.com/danlikendy/heart-risk-ml-project/blob/main/docs/RUN.md">run</a>
+    <a href="https://github.com/danlikendy/heart-risk-ml-project/blob/main/docs/API.md">api</a>
+  </p>
+
+  <div class="rule"></div>
+
+  <h2>Why it exists</h2>
+  <p>Labs, vitals, habits, income — one row per patient. Target is high vs low attack risk. About a third of the train set is the high class. Nine lifestyle fields are empty on the same 243 people. A majority classifier looks accurate and is useless for screening. I trained for <strong>F1-macro</strong> and put the model behind FastAPI so a batch job can hit it without opening a notebook.</p>
+
+  <h2>Numbers I will defend</h2>
+  <div class="nums">
+    <div class="num"><b>8 685</b><span>train rows</span></div>
+    <div class="num"><b>966</b><span>test rows</span></div>
+    <div class="num"><b>35%</b><span>high-risk in train</span></div>
+    <div class="num"><b>0.54</b><span>CV F1-macro ± 0.008</span></div>
+  </div>
+  <p style="margin-top:14px">Train-set report sits near 0.90. That’s memorization. CV is the number. Test labels aren’t in this repo; the scored file flags <strong>380 / 966</strong> as high (~39%), so the threshold isn’t glued to the majority class.</p>
+
+  <h2>Stack on the wire</h2>
+  <p>Preprocessor (medians + category maps, frozen column order) → CatBoost (<span class="mono">depth=6</span>, 500 iterations, balanced class weights) → <span class="mono">id, prediction</span>.</p>
+  <pre>pip install -r requirements.txt
+python scripts/train.py
+uvicorn src.app:app --reload
+
+curl -X POST http://127.0.0.1:8000/predict \
+  -H 'Content-Type: application/json' \
+  -d '{"csv_path":"heart_test.csv"}'</pre>
+  <p>GitHub Pages cannot run CatBoost. This page is the case write-up. Inference is local (or any box with the artifacts).</p>
+
+  <h2>Scored test sample</h2>
+  <table>
+    <thead><tr><th>id</th><th>prediction</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <p class="warn">Not a medical device. No clinician signed this off. Don’t treat a 0/1 from this model as a diagnosis.</p>
+
+  <footer>
+    MIT · <a href="https://tsygantsov.ru">tsygantsov.ru</a>
+  </footer>
+  <script>
+    fetch("data/sample.json")
+      .then((r) => r.json())
+      .then((rows) => {
+        const tbody = document.getElementById("rows");
+        tbody.innerHTML = rows
+          .map((x) => "<tr><td>" + x.id + "</td><td>" + x.prediction + "</td></tr>")
+          .join("");
+      })
+      .catch(() => {
+        document.getElementById("rows").innerHTML =
+          "<tr><td colspan='2'>sample.json missing</td></tr>";
+      });
+  </script>
+</body>
+</html>
