@@ -1,4 +1,5 @@
-# Documentation
+# Docs
 
-- **[RUN.md](RUN.md)** — How to run the application: install, train, start API, get predictions, generate CSV, evaluate
-- **[API.md](API.md)** — API and classes reference: `config`, `HeartRiskPreprocessor`, `HeartRiskModel`, `HeartRiskPipeline`, FastAPI endpoints, scripts
+- Site: [index.html](index.html) (GitHub Pages)
+- [RUN.md](RUN.md)
+- [API.md](API.md)

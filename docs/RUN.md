@@ -1,143 +1,62 @@
-# How to run the Heart Risk application
+# Run
 
-## Prerequisites
-
-- Python 3.10+
-- Project dependencies (see below)
-
-## 1. Clone and install
+Python 3.10+. From the repo root:
 
 ```bash
-git clone https://github.com/danlikendy/heart-risk-ml-project.git
-cd heart-risk-ml-project
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## 2. Train the model (if artifacts are missing)
+## Train
 
-If the `artifacts/` folder does not contain a saved model and preprocessor:
-
-- Open and run the Jupyter notebook: `notebooks/eda_and_training.ipynb`  
-  (EDA, preprocessing, training, saving to `artifacts/`, and optional test predictions), **or**
-- Run training from the project root (example with sklearn):
+Writes `artifacts/preprocessor.joblib` and `artifacts/model.joblib`.
 
 ```bash
-python -c "
-import sys; from pathlib import Path; sys.path.insert(0, str(Path.cwd()))
-import pandas as pd
-from src.preprocessing import HeartRiskPreprocessor
-from src.config import TARGET_COL, ARTIFACTS_DIR, MODEL_PATH, PREPROCESSOR_PATH
-ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
-train = pd.read_csv('heart_train.csv')
-preprocessor = HeartRiskPreprocessor().fit(train)
-preprocessor.save(PREPROCESSOR_PATH)
-from sklearn.ensemble import RandomForestClassifier
-from src.model import HeartRiskModel
-X = preprocessor.transform(train)
-y = train[TARGET_COL].astype(int)
-model = HeartRiskModel(estimator=RandomForestClassifier(n_estimators=200, max_depth=12, random_state=42).fit(X, y))
-model.save(MODEL_PATH)
-print('Artifacts saved.')
-"
+python scripts/train.py
 ```
 
-After training, `artifacts/` will contain `preprocessor.joblib` and `model.joblib` (or `model.cbm` if using CatBoost in the notebook)
+Same hyperparameters as the notebook (CatBoost, balanced class weights, stratified 5-fold printed to stdout).
 
-## 3. Start the API
-
-From the project root (with the virtualenv activated):
-
-```bash
-uvicorn src.app:app --reload --host 0.0.0.0 --port 8000
-```
-
-### Все ссылки (когда сервер запущен)
-
-| Назначение | Ссылка |
-|------------|--------|
-| Главная (форма загрузки) | [http://127.0.0.1:8000/](http://127.0.0.1:8000/) |
-| Swagger UI (интерактивная документация) | [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) |
-| ReDoc | [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc) |
-| Проверка работы API | [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health) |
-| Предсказание по пути к CSV | `POST` [http://127.0.0.1:8000/predict](http://127.0.0.1:8000/predict) |
-| Предсказание по загрузке файла | `POST` [http://127.0.0.1:8000/predict/upload](http://127.0.0.1:8000/predict/upload) |
-
-Тот же доступ по `http://localhost:8000` вместо `127.0.0.1`, если не меняли хост.
-
-### Как самому проверить FastAPI
-
-1. **Health** — в браузере открой [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health): должен вернуться `{"status":"ok"}`.
-2. **Главная страница** — открой [http://127.0.0.1:8000/](http://127.0.0.1:8000/): форма загрузки CSV и кнопка отправки.
-3. **Swagger** — открой [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs): можно вызвать `/health`, `/predict` и `/predict/upload` из интерфейса.
-4. **Предсказание по пути к файлу** (из корня проекта):
-   ```bash
-   curl -X POST http://127.0.0.1:8000/predict -H "Content-Type: application/json" -d '{"csv_path": "heart_test.csv"}'
-   ```
-5. **Предсказание по загрузке файла**:
-   ```bash
-   curl -X POST http://127.0.0.1:8000/predict/upload -F "file=@heart_test.csv"
-   ```
-
-## 4. Get predictions
-
-### Option A: Path to CSV (POST JSON)
-
-```bash
-curl -X POST http://localhost:8000/predict \
-  -H "Content-Type: application/json" \
-  -d '{"csv_path": "heart_test.csv"}'
-```
-
-`csv_path` can be relative to the project root or absolute
-
-### Option B: Upload CSV file
-
-```bash
-curl -X POST http://localhost:8000/predict/upload \
-  -F "file=@heart_test.csv"
-```
-
-### Option C: Web form
-
-Open `http://localhost:8000/` in a browser and use the upload form
-
-### Response format
-
-JSON with a list of objects `id` and `prediction` (0 or 1):
-
-```json
-{
-  "predictions": [
-    {"id": 7746, "prediction": 0},
-    {"id": 4202, "prediction": 1}
-  ]
-}
-```
-
-## 5. Generate predictions CSV (id, prediction)
-
-Without starting the API:
+## Infer without the API
 
 ```bash
 python scripts/generate_predictions.py heart_test.csv -o predictions.csv
 ```
 
-Or with defaults (reads `heart_test.csv`, writes `predictions.csv`):
+## API
+
+Needs artifacts on disk.
 
 ```bash
-python scripts/generate_predictions.py
+uvicorn src.app:app --reload --host 127.0.0.1 --port 8000
 ```
 
-## 6. Evaluate predictions (with ground truth)
+| | |
+|---|---|
+| Upload form | http://127.0.0.1:8000/ |
+| OpenAPI | http://127.0.0.1:8000/docs |
+| Health | `GET /health` |
+| Path | `POST /predict` `{"csv_path":"heart_test.csv"}` |
+| File | `POST /predict/upload` field `file` |
 
-If you have `correct_answers.csv` with the true labels:
+```bash
+curl -s -X POST http://127.0.0.1:8000/predict \
+  -H 'Content-Type: application/json' \
+  -d '{"csv_path":"heart_test.csv"}'
+
+curl -s -X POST http://127.0.0.1:8000/predict/upload \
+  -F 'file=@heart_test.csv'
+```
+
+Response: `{"predictions":[{"id":7746,"prediction":0}, ...]}`.
+
+## Score against labels
+
+If you have `correct_answers.csv` with `id,prediction`:
 
 ```bash
 python test.py --student predictions.csv --correct correct_answers.csv
 ```
 
----
-
-For a description of the application classes and methods, see [API.md](API.md)
+Classes: [API.md](API.md).
