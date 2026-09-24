@@ -11,7 +11,7 @@ from .preprocessing import HeartRiskPreprocessor
 from .model import HeartRiskModel
 from .pipeline import HeartRiskPipeline
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 __all__ = [
     "HeartRiskPreprocessor",
     "HeartRiskModel",

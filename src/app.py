@@ -13,9 +13,9 @@ from .config import PROJECT_ROOT
 from .pipeline import HeartRiskPipeline
 
 app = FastAPI(
-    title="Heart Risk Prediction API",
-    description="Predict heart attack risk (binary) from patient CSV data.",
-    version="0.1.0",
+    title="Heart risk scoring",
+    description="Binary heart-attack risk from a patient CSV. Not a diagnostic tool.",
+    version="1.0.0",
 )
 
 # Lazy-loaded pipeline (load on first request)
@@ -95,21 +95,28 @@ def root() -> str:
     """Simple HTML page with instructions and form for CSV upload."""
     return """
 <!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><title>Heart Risk Prediction</title></head>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Heart risk scoring</title>
+  <style>
+    body { font: 16px/1.45 system-ui, sans-serif; max-width: 40rem; margin: 2.5rem auto; padding: 0 1rem; color: #1a1917; }
+    code { font-size: 0.9em; }
+    label { display: block; margin: 1rem 0 0.4rem; }
+  </style>
+</head>
 <body>
-  <h1>Heart Risk Prediction API</h1>
-  <p>Endpoints:</p>
+  <h1>Heart risk scoring</h1>
+  <p>CSV of patients in. <code>id</code> + <code>prediction</code> (0/1) out. Needs trained artifacts on this machine.</p>
   <ul>
-    <li><b>POST /predict</b> — JSON body: <code>{"csv_path": "heart_test.csv"}</code> (path relative to project root)</li>
-    <li><b>POST /predict/upload</b> — upload a CSV file</li>
-    <li><b>GET /health</b> — health check</li>
-    <li><b>GET /docs</b> — Swagger UI</li>
+    <li><code>POST /predict</code> — <code>{"csv_path": "heart_test.csv"}</code></li>
+    <li><code>POST /predict/upload</code> — multipart file</li>
+    <li><a href="/docs">OpenAPI</a> · <a href="/health">health</a></li>
   </ul>
-  <h2>Upload CSV</h2>
   <form action="/predict/upload" method="post" enctype="multipart/form-data">
+    <label>Test CSV</label>
     <input type="file" name="file" accept=".csv" required />
-    <button type="submit">Predict</button>
+    <button type="submit">Score</button>
   </form>
 </body>
 </html>
